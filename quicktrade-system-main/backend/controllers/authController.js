@@ -1,21 +1,23 @@
 const sql = require("../db");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 exports.register = async (req, res) => {
   try {
     const { full_name, username, email, password } = req.body;
+    const db = await sql.getDB();
 
     if (!username || !email || !password || password.length < 8) {
       return res.status(400).json({ error: "Invalid inputs. Password must be at least 8 characters." });
     }
 
     // Check if user exists
-    const userCheck = await sql.query`
-      SELECT * FROM users WHERE username = ${username} OR email = ${email}
-    `;
+    const userCheck = await db.get(
+      'SELECT * FROM users WHERE username = ? OR email = ?',
+      [username, email]
+    );
 
-    if (userCheck.recordset.length > 0) {
+    if (userCheck) {
       return res.status(400).json({ error: "Username or Email already taken" });
     }
 
@@ -23,10 +25,10 @@ exports.register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Insert user
-    await sql.query`
-      INSERT INTO users (full_name, username, email, password, created_at, updated_at)
-      VALUES (${full_name}, ${username}, ${email}, ${hashedPassword}, GETDATE(), GETDATE())
-    `;
+    await db.run(
+      'INSERT INTO users (full_name, username, email, password) VALUES (?, ?, ?, ?)',
+      [full_name, username, email, hashedPassword]
+    );
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (err) {
@@ -37,13 +39,13 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const { identifier, password } = req.body; // identifier is username or email
+    const { identifier, password } = req.body;
+    const db = await sql.getDB();
 
-    const result = await sql.query`
-      SELECT * FROM users WHERE username = ${identifier} OR email = ${identifier}
-    `;
-
-    const user = result.recordset[0];
+    const user = await db.get(
+      'SELECT * FROM users WHERE username = ? OR email = ?',
+      [identifier, identifier]
+    );
 
     if (!user) {
       return res.status(401).json({ error: "Invalid credentials" });
@@ -74,5 +76,20 @@ exports.login = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Login failed" });
+  }
+};
+
+exports.verifyUser = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const db = await sql.getDB();
+    const user = await db.get('SELECT user_id FROM users WHERE user_id = ?', [user_id]);
+    if (user) {
+      res.json({ valid: true });
+    } else {
+      res.status(404).json({ valid: false });
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Verification failed" });
   }
 };

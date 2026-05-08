@@ -31,13 +31,13 @@ export default function Register() {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/auth/register", {
-        full_name: formData.full_name,
-        username: formData.username,
-        email: formData.email,
-        password: formData.password
-      });
-      alert("Registration successful! Please log in.");
+        await axios.post("/api/auth/register", {
+          full_name: formData.full_name,
+          username: formData.username,
+          email: formData.email,
+          password: formData.password
+        });
+        alert("Registration successful! Please log in.");
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.error || "Registration failed");

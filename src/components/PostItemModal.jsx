@@ -4,6 +4,7 @@ const PostItemModal = ({ isOpen, onClose, onPost }) => {
   const [formData, setFormData] = useState({
     name: '',
     game: 'Counter Strike 2',
+    category: 'Skins',
     description: '',
     value: '',
     tags: '',
@@ -21,21 +22,26 @@ const PostItemModal = ({ isOpen, onClose, onPost }) => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("File size exceeds 5MB limit!");
+      if (file.size > 2 * 1024 * 1024) {
+        alert("File size exceeds 2MB limit for the demo!");
         return;
       }
       if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
         alert("Invalid file type! Please upload a JPG, PNG, or WEBP image.");
         return;
       }
-      setScreenshot(file);
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setScreenshot(reader.result); // This is the base64 string
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onPost({ ...formData, screenshot });
+    onPost({ ...formData, screenshot_url: screenshot });
     onClose();
   };
 
@@ -76,12 +82,39 @@ const PostItemModal = ({ isOpen, onClose, onPost }) => {
               </select>
             </div>
             <div className="form-group" style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '5px' }}>Category *</label>
+              <select 
+                name="category" value={formData.category} onChange={handleChange}
+                style={{ width: '100%', padding: '10px', backgroundColor: 'var(--black)', border: '1px solid #444', color: 'white', borderRadius: '5px' }}
+              >
+                <option>Skins</option>
+                <option>Cosmetics</option>
+                <option>Limiteds</option>
+                <option>Weapons</option>
+                <option>Mounts</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="form-row" style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
+            <div className="form-group" style={{ flex: 1 }}>
               <label style={{ display: 'block', marginBottom: '5px' }}>Estimated Value ($) *</label>
               <input 
                 type="number" name="value" required
                 value={formData.value} onChange={handleChange}
                 style={{ width: '100%', padding: '10px', backgroundColor: 'var(--black)', border: '1px solid #444', color: 'white', borderRadius: '5px' }}
               />
+            </div>
+            <div className="form-group" style={{ flex: 1 }}>
+              <label style={{ display: 'block', marginBottom: '5px' }}>Visibility</label>
+              <select 
+                name="visibility" value={formData.visibility} onChange={handleChange}
+                style={{ width: '100%', padding: '10px', backgroundColor: 'var(--black)', border: '1px solid #444', color: 'white', borderRadius: '5px' }}
+              >
+                <option value="public">Public</option>
+                <option value="friends">Friends Only</option>
+                <option value="private">Private</option>
+              </select>
             </div>
           </div>
 
@@ -102,16 +135,6 @@ const PostItemModal = ({ isOpen, onClose, onPost }) => {
                 style={{ width: '100%', padding: '10px', backgroundColor: 'var(--black)', border: '1px solid #444', color: 'white', borderRadius: '5px' }}
               />
             </div>
-            <div className="form-group" style={{ flex: 1 }}>
-              <label style={{ display: 'block', marginBottom: '5px' }}>Visibility</label>
-              <select 
-                name="visibility" value={formData.visibility} onChange={handleChange}
-                style={{ width: '100%', padding: '10px', backgroundColor: 'var(--black)', border: '1px solid #444', color: 'white', borderRadius: '5px' }}
-              >
-                <option value="public">Public</option>
-                <option value="private">Private</option>
-              </select>
-            </div>
           </div>
 
           <div className="form-group" style={{ marginBottom: '20px' }}>
@@ -124,13 +147,25 @@ const PostItemModal = ({ isOpen, onClose, onPost }) => {
           </div>
 
           <div className="form-group" style={{ marginBottom: '25px' }}>
-            <label style={{ display: 'block', marginBottom: '5px' }}>Upload Screenshot (Max 5MB)</label>
+            <label style={{ display: 'block', marginBottom: '5px' }}>Upload Screenshot (Max 2MB)</label>
             <input 
               type="file" 
               accept="image/*"
               onChange={handleFileChange}
-              style={{ color: 'var(--text-gray)' }} 
+              style={{ color: 'var(--text-gray)', marginBottom: '10px' }} 
             />
+            {screenshot && (
+              <div className="image-preview" style={{ marginTop: '10px', border: '1px solid var(--gold)', padding: '5px', borderRadius: '5px' }}>
+                <img src={screenshot} alt="Preview" style={{ maxWidth: '100%', maxHeight: '150px', objectFit: 'contain' }} />
+                <button 
+                  type="button" 
+                  onClick={() => setScreenshot(null)}
+                  style={{ display: 'block', marginTop: '5px', color: '#ff4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.8rem' }}
+                >
+                  Remove Image
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="modal-actions" style={{ display: 'flex', gap: '15px' }}>

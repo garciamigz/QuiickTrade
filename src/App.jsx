@@ -5,6 +5,9 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Help from "./pages/Help";
 import Reports from "./pages/Reports";
+import EscrowRoom from "./pages/EscrowRoom";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 function App() {
   return (
@@ -16,6 +19,9 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/help" element={<Help />} />
         <Route path="/reports" element={<Reports />} />
+        <Route path="/escrow/:tradeId" element={<EscrowRoom />} />
+        <Route path="/tos" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
       </Routes>
     </Router>
   );

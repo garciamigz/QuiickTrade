@@ -63,19 +63,64 @@ const Sidebar = ({ filters, onFilterChange }) => {
       )}
 
       <div className="filter-group">
-        <h3>Value Range: ${filters.valueRange[0]} - ${filters.valueRange[1]}+</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+          <h3 style={{ margin: 0 }}>Value Range</h3>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <span style={{ position: 'absolute', left: '8px', color: 'var(--gold)', fontSize: '0.8rem' }}>$</span>
+            <input 
+              type="number" 
+              value={filters.valueRange[1]} 
+              onChange={(e) => onFilterChange({ ...filters, valueRange: [0, Math.max(0, parseInt(e.target.value) || 0)] })}
+              style={{ 
+                width: '80px', 
+                padding: '4px 4px 4px 18px', 
+                backgroundColor: 'var(--black)', 
+                border: '1px solid var(--gold)', 
+                color: 'white', 
+                borderRadius: '4px',
+                fontSize: '0.85rem',
+                outline: 'none'
+              }}
+            />
+          </div>
+        </div>
         <input 
           type="range" 
           min="0" 
           max="5000" 
           step="50"
-          value={filters.valueRange[1]} 
+          value={Math.min(5000, filters.valueRange[1])} 
           onChange={(e) => onFilterChange({ ...filters, valueRange: [0, parseInt(e.target.value)] })}
           className="value-slider" 
         />
-        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-gray)', fontSize: '0.8rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-gray)', fontSize: '0.8rem', marginBottom: '15px' }}>
           <span>$0</span>
           <span>$5000+</span>
+        </div>
+
+        {/* Currency Conversion Display */}
+        <div className="currency-converter" style={{ 
+          backgroundColor: 'rgba(212, 175, 55, 0.05)', 
+          padding: '12px', 
+          borderRadius: '8px', 
+          border: '1px solid rgba(212, 175, 55, 0.2)' 
+        }}>
+          <h4 style={{ fontSize: '0.75rem', color: 'var(--gold)', marginBottom: '8px', textTransform: 'uppercase' }}>Estimated Conversion</h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+              <span style={{ color: 'var(--text-gray)' }}>₱ Pesos (PHP)</span>
+              <span className="gold-glow">₱{(filters.valueRange[1] * 56.5).toLocaleString()}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+              <span style={{ color: 'var(--text-gray)' }}>€ Euro (EUR)</span>
+              <span className="gold-glow">€{(filters.valueRange[1] * 0.93).toLocaleString()}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+              <span style={{ color: 'var(--text-gray)' }}>¥ Yen (JPY)</span>
+              <span className="gold-glow">¥{(filters.valueRange[1] * 155.8).toLocaleString()}</span>
+            </div>
+          </div>
+          <p style={{ fontSize: '0.65rem', color: '#666', marginTop: '10px', fontStyle: 'italic' }}>* Rates are estimates based on market average.</p>
         </div>
       </div>
     </aside>

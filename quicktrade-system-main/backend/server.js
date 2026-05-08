@@ -5,7 +5,8 @@ const cors = require("cors");
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const authRoutes = require("./routes/auth");
 const itemRoutes = require("./routes/items");
@@ -15,6 +16,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/items", itemRoutes);
 app.use("/api/trades", tradeRoutes);
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
-});
+if (process.env.NODE_ENV !== "production") {
+  app.listen(5000, () => {
+    console.log("Server running on port 5000");
+  });
+}
+
+module.exports = app;
